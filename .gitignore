@@ -1,0 +1,9 @@
+# dirs
+data/
+out/
+
+# R files
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
