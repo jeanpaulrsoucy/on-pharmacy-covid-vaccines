@@ -48,7 +48,11 @@ process_data <- function(file_name, file_date) {
     address_province = character(n_pharms),
     address_postal_code = character(n_pharms),
     address_country = character(n_pharms),
-    phu = character(n_pharms)
+    phu = character(n_pharms),
+    vaccine_astrazeneca = integer(n_pharms),
+    vaccine_pfizer = integer(n_pharms),
+    vaccine_moderna = integer(n_pharms),
+    vaccine_johnsonjohnson = integer(n_pharms)
   )
   
   # extract name, address and PHU from each each pharmacy card
@@ -75,6 +79,28 @@ process_data <- function(file_name, file_date) {
       pharms[i, "phu"] <- NA
     }
     
+    ## fill vaccine type
+    if (file_date < as.Date("2021-04-29")) {
+      # assume all vaccines are AZ before this date
+      pharms[i, "vaccine_astrazeneca"] <- 1
+    } else {
+      # Pfizer pilot began 2021-04-30, but pharmacies began being listed the day prior
+      dat_vaccine <- webpage[i] %>%
+        html_elements("div") %>% `[`(7) %>% html_text
+      pharms[i, "vaccine_astrazeneca"] <- ifelse(
+        grepl("AstraZeneca", dat_vaccine), 1, 0
+      )
+      pharms[i, "vaccine_pfizer"] <- ifelse(
+        grepl("Pfizer", dat_vaccine), 1, 0
+      )
+      pharms[i, "vaccine_moderna"] <- ifelse(
+        grepl("Moderna", dat_vaccine), 1, 0
+      )
+      # # Johnson & Johnson not offered yet
+      # pharms[i, "vaccine_johnsonjohnson"] <- ifelse(
+      #   grepl("Johnson & Johnson", dat_vaccine), 1, 0
+      # )
+    }
   }
   
   # write file
